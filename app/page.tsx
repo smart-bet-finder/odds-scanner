@@ -7,9 +7,8 @@ export default function Page() {
 
   const loadData = async () => {
     try {
-      // Čitamo fajl koji GitHub Actions stalno ažurira
       const response = await fetch('./data.json');
-      if (!response.ok) throw new Error("Fajl još nije kreiran");
+      if (!response.ok) throw new Error("Waiting for data...");
       const result = await response.json();
       
       const processed = result.map((match: any) => {
@@ -35,7 +34,7 @@ export default function Page() {
 
       setData(processed);
     } catch (err) {
-      console.error("Podaci se još uvek generišu od strane GitHub-a.");
+      console.error("Data syncing...");
     } finally {
       setLoading(false);
     }
@@ -43,44 +42,101 @@ export default function Page() {
 
   useEffect(() => { loadData(); }, []);
 
+  // LOGIKA ZA GENERISANJE TIKETA
+  
+  // 1. STEADY BUILD: Favoriti (1.30 - 1.85) sa najboljim Edge-om
+  const steadyBuild = data
+    .filter(m => m.best >= 1.30 && m.best <= 1.85)
+    .sort((a, b) => parseFloat(b.edge) - parseFloat(a.edge))
+    .slice(0, 4);
+
+  const steadyTotalOdds = steadyBuild.reduce((acc, curr) => acc * curr.best, 1).toFixed(2);
+
+  // 2. ROCKET COMBO: Top 3 meča sa apsolutno najvećim Edge-om
+  const rocketCombo = data
+    .sort((a, b) => parseFloat(b.edge) - parseFloat(a.edge))
+    .slice(0, 3);
+
+  const rocketTotalOdds = rocketCombo.reduce((acc, curr) => acc * curr.best, 1).toFixed(2);
+
   return (
-    <main style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-      <header style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '20px', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>
+    <main style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#f1f5f9' }}>
+      <header style={{ marginBottom: '40px', borderBottom: '1px solid #1e293b', paddingBottom: '20px' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>
           Smart<span style={{ color: '#22c55e' }}>Scanner</span> PRO
         </h1>
-        <p style={{ color: '#64748b', fontSize: '14px' }}>
-          <span style={{ color: '#22c55e' }}>●</span> Shield Mode Active: No API costs for visitors
-        </p>
+        <p style={{ color: '#64748b', fontSize: '12px' }}>Automated Daily Analysis Mode</p>
       </header>
 
-      <div className="table-container">
-        {loading ? (
-          <p style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>Učitavanje stabilizovanih podataka...</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Match Event</th>
-                <th>Avg Mkt</th>
-                <th style={{ color: '#22c55e' }}>Best Odds</th>
-                <th>Bookmaker</th>
-                <th style={{ textAlign: 'right' }}>Edge Score</th>
+      {/* SECTION: SMART COMBOS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+        
+        {/* STEADY BUILD BOX */}
+        <div style={{ background: 'linear-gradient(145deg, #0f172a, #1e293b)', padding: '25px', borderRadius: '24px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <h3 style={{ margin: 0, color: '#22c55e', textTransform: 'uppercase', fontSize: '14px' }}>🛡️ Steady Build</h3>
+            <span style={{ fontSize: '10px', background: '#22c55e', color: '#000', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>SAFE ACCUMULATOR</span>
+          </div>
+          <div style={{ marginBottom: '15px' }}>
+            {steadyBuild.map(m => (
+              <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>{m.teams}</span>
+                <span style={{ fontWeight: 'bold' }}>{m.best}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#64748b', fontSize: '12px' }}>Total Odds:</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff' }}>{steadyTotalOdds}</span>
+          </div>
+        </div>
+
+        {/* ROCKET COMBO BOX */}
+        <div style={{ background: 'linear-gradient(145deg, #0f172a, #1e293b)', padding: '25px', borderRadius: '24px', border: '1px solid rgba(96, 165, 250, 0.2)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <h3 style={{ margin: 0, color: '#60a5fa', textTransform: 'uppercase', fontSize: '14px' }}>🚀 Rocket Combo</h3>
+            <span style={{ fontSize: '10px', background: '#60a5fa', color: '#000', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>HIGH VALUE</span>
+          </div>
+          <div style={{ marginBottom: '15px' }}>
+            {rocketCombo.map(m => (
+              <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>{m.teams}</span>
+                <span style={{ fontWeight: 'bold' }}>{m.best}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#64748b', fontSize: '12px' }}>Total Odds:</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff' }}>{rocketTotalOdds}</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* MAIN DATA TABLE */}
+      <div className="table-container" style={{ background: '#0f172a', borderRadius: '20px', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <tr>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>MATCH</th>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>AVG</th>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#22c55e', fontSize: '11px' }}>BEST</th>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>BOOKIE</th>
+              <th style={{ padding: '15px', textAlign: 'right', color: '#64748b', fontSize: '11px' }}>EDGE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((m) => (
+              <tr key={m.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: '15px', fontWeight: '600' }}>{m.teams}</td>
+                <td style={{ padding: '15px', color: '#64748b' }}>{m.avg}</td>
+                <td style={{ padding: '15px', fontWeight: '900', fontSize: '1.1rem' }}>{m.best}</td>
+                <td style={{ padding: '15px' }}><span style={{ background: '#1e293b', padding: '4px 8px', borderRadius: '6px', fontSize: '11px' }}>{m.bookie}</span></td>
+                <td style={{ padding: '15px', textAlign: 'right', color: '#22c55e', fontWeight: '900' }}>+{m.edge}%</td>
               </tr>
-            </thead>
-            <tbody>
-              {data.map((m) => (
-                <tr key={m.id}>
-                  <td className="match-name">{m.teams}</td>
-                  <td style={{ color: '#64748b' }}>{m.avg}</td>
-                  <td className="odds-value">{m.best}</td>
-                  <td><span className="bookie-tag">{m.bookie}</span></td>
-                  <td className="edge-badge" style={{ textAlign: 'right' }}>+{m.edge}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
     </main>
   );
