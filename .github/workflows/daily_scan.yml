@@ -14,8 +14,13 @@ jobs:
 
       - name: Fetch API Data
         run: |
+          # 1. Kreiramo folder public ako ne postoji (ovo je popravka za Error 23)
+          mkdir -p public
+          
+          # 2. Povlačimo podatke sa API-ja i čuvamo ih direktno u folder
           curl "https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey=8d79681b1e42354408fb13d12b34887d&regions=eu&markets=h2h" -o public/data.json
-          # Kopiramo ga i u root radi sigurnosti GitHub Pages-a
+          
+          # 3. Kopiramo fajl i u glavni (root) direktorijum radi sigurnosti učitavanja
           cp public/data.json data.json
           
       - name: Commit and Push Data
@@ -23,5 +28,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add public/data.json data.json
-          git commit -m "Automated Odds Update" || exit 0
+          git commit -m "Automated Odds Update (90min cycle)" || exit 0
           git push
