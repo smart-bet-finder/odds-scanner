@@ -4,16 +4,14 @@ on:
     - cron: '0 */2 * * *' 
   workflow_dispatch: 
 
-# DODAJ OVE LINIJE ISPOD:
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          token: ${{ secrets.MY_TOKEN }} # OVO KAŽE: "KORISTI MAJIN KLJUČ"
+
       - name: Fetch API Data
         run: |
           mkdir -p public
