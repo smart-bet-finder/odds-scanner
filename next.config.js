@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: ['api.the-odds-api.com'],
-  },
-}
+    output: 'export',  // OVA LINIJA JE KLJUČNA
+    images: {
+        unoptimized: true, // Obavezno za statički export
+    },
+};
 
-module.exports = nextConfig
-
+export default nextConfig;
