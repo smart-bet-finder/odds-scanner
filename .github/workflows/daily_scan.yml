@@ -1,0 +1,21 @@
+name: Daily Odds Scan
+on:
+  schedule:
+    - cron: '0 12 * * *' # Svaki dan u 12:00 UTC
+  workflow_dispatch: # Dozvoljava ti da pokreneš sken i ručno ako zatreba
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch API Data
+        run: |
+          curl "https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey=8d79681b1e42354408fb13d12b34887d&regions=eu&markets=h2h" -o public/data.json
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add public/data.json
+          git commit -m "Automated Daily Scan" || exit 0
+          git push
