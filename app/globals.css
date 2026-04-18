@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #020617;
-  color: #f8fafc;
+:root {
+  --background: #020617;
+  --foreground: #ffffff;
 }
 
-/* Custom glow efekt za SaaS vibe */
-.glow-text {
-  text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+body {
+  background: var(--background);
+  color: var(--foreground);
 }
