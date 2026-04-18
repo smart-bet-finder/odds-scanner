@@ -1,42 +1,26 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
-const API_KEY = "8d79681b1e42354408fb13d12b34887d";
-const REFRESH_INTERVAL = 90 * 60 * 1000; // 90 minuta u milisekundama
-
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [timeAgo, setTimeAgo] = useState<string>("Never");
+  const [loading, setLoading] = useState(true);
 
-  const scanMarket = async () => {
-    setLoading(true);
-    setError(null);
+  const loadData = async () => {
     try {
-      const response = await fetch(
-        `https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey=${API_KEY}&regions=eu&markets=h2h`
-      );
-      if (!response.ok) throw new Error("API Limit reached or invalid key");
-      
+      // Čitamo lokalni fajl koji je GitHub Action generisao
+      const response = await fetch('./data.json');
       const result = await response.json();
-      if (!Array.isArray(result)) return;
-
+      
       const processed = result.map((match: any) => {
         const bookies = match.bookmakers || [];
         if (bookies.length === 0) return null;
 
         const homeOdds = bookies.map((b: any) => b.markets[0]?.outcomes[0]?.price).filter(Boolean);
-        if (homeOdds.length === 0) return null;
-
         const avg = homeOdds.reduce((a: number, b: number) => a + b, 0) / homeOdds.length;
         const best = bookies.reduce((prev: any, curr: any) => {
           const currentPrice = curr.markets[0]?.outcomes[0]?.price || 0;
           return currentPrice > prev.price ? { price: currentPrice, title: curr.title } : prev;
         }, { price: 0, title: '' });
-
-        const edgeValue = ((best.price - avg) / avg) * 100;
 
         return {
           id: match.id,
@@ -44,68 +28,28 @@ export default function Page() {
           avg: avg.toFixed(2),
           best: best.price,
           bookie: best.title,
-          edge: edgeValue.toFixed(1),
-          isValue: edgeValue > 2
+          edge: (((best.price - avg) / avg) * 100).toFixed(1)
         };
       }).filter((m: any) => m !== null);
 
-      setData(processed.sort((a: any, b: any) => parseFloat(b.edge) - parseFloat(a.edge)));
-      setLastUpdated(new Date());
-    } catch (err: any) {
-      setError(err.message);
+      setData(processed);
+    } catch (err) {
+      console.error("Greška pri učitavanju statičkih podataka.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Efekat za automatsko skeniranje
-  useEffect(() => {
-    scanMarket();
-    const interval = setInterval(scanMarket, REFRESH_INTERVAL);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Efekat za ažuriranje natpisa "Last updated" svake sekunde
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (!lastUpdated) return;
-      const seconds = Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000);
-      if (seconds < 60) setTimeAgo(`${seconds}s ago`);
-      else {
-        const mins = Math.floor(seconds / 60);
-        setTimeAgo(`${mins}m ago`);
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [lastUpdated]);
+  useEffect(() => { loadData(); }, []);
 
   return (
     <main style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '900', textTransform: 'uppercase', fontStyle: 'italic', margin: 0 }}>
-            Smart<span style={{ color: '#22c55e' }}>Scanner</span> PRO
-          </h1>
-          <p style={{ color: '#64748b', margin: '5px 0 0 0' }}>Autopilot Mode: Refreshing every 90 mins</p>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-           <p style={{ color: '#64748b', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', margin: 0 }}>Last Engine Scan</p>
-           <p style={{ color: loading ? '#60a5fa' : '#22c55e', fontSize: '1.2rem', fontWeight: '900', margin: 0 }}>
-             {loading ? "SCANNING..." : timeAgo}
-           </p>
-        </div>
+      <header>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', fontStyle: 'italic' }}>
+          Smart<span style={{ color: '#22c55e' }}>Scanner</span> PRO
+        </h1>
+        <p style={{ color: '#64748b' }}>Sistem osvežen: Jednom dnevno (Automated Static Mode)</p>
       </header>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
-        <div style={{ background: '#0f172a', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <p style={{ color: '#64748b', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>Opportunities Found</p>
-          <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', margin: '10px 0 0 0' }}>{data.length}</p>
-        </div>
-        <div style={{ background: '#0f172a', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <p style={{ color: '#64748b', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>API Usage Saftey</p>
-          <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f59e0b', margin: '10px 0 0 0' }}>ACTIVE</p>
-        </div>
-      </div>
 
       <div className="table-container">
         <table>
