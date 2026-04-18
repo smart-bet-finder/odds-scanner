@@ -7,8 +7,9 @@ export default function Page() {
 
   const loadData = async () => {
     try {
-      // Čitamo lokalni fajl koji je GitHub Action generisao
+      // Čitamo fajl koji GitHub Actions stalno ažurira
       const response = await fetch('./data.json');
+      if (!response.ok) throw new Error("Fajl još nije kreiran");
       const result = await response.json();
       
       const processed = result.map((match: any) => {
@@ -34,7 +35,7 @@ export default function Page() {
 
       setData(processed);
     } catch (err) {
-      console.error("Greška pri učitavanju statičkih podataka.");
+      console.error("Podaci se još uvek generišu od strane GitHub-a.");
     } finally {
       setLoading(false);
     }
@@ -44,36 +45,42 @@ export default function Page() {
 
   return (
     <main style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-      <header>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', fontStyle: 'italic' }}>
+      <header style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '20px', marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>
           Smart<span style={{ color: '#22c55e' }}>Scanner</span> PRO
         </h1>
-        <p style={{ color: '#64748b' }}>Sistem osvežen: Jednom dnevno (Automated Static Mode)</p>
+        <p style={{ color: '#64748b', fontSize: '14px' }}>
+          <span style={{ color: '#22c55e' }}>●</span> Shield Mode Active: No API costs for visitors
+        </p>
       </header>
 
       <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Match Event</th>
-              <th>Avg Mkt</th>
-              <th style={{ color: '#22c55e' }}>Best Odds</th>
-              <th>Bookmaker</th>
-              <th style={{ textAlign: 'right' }}>Edge Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((m) => (
-              <tr key={m.id}>
-                <td className="match-name">{m.teams}</td>
-                <td style={{ color: '#64748b' }}>{m.avg}</td>
-                <td className="odds-value">{m.best}</td>
-                <td><span className="bookie-tag">{m.bookie}</span></td>
-                <td className="edge-badge" style={{ textAlign: 'right' }}>+{m.edge}%</td>
+        {loading ? (
+          <p style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>Učitavanje stabilizovanih podataka...</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Match Event</th>
+                <th>Avg Mkt</th>
+                <th style={{ color: '#22c55e' }}>Best Odds</th>
+                <th>Bookmaker</th>
+                <th style={{ textAlign: 'right' }}>Edge Score</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((m) => (
+                <tr key={m.id}>
+                  <td className="match-name">{m.teams}</td>
+                  <td style={{ color: '#64748b' }}>{m.avg}</td>
+                  <td className="odds-value">{m.best}</td>
+                  <td><span className="bookie-tag">{m.bookie}</span></td>
+                  <td className="edge-badge" style={{ textAlign: 'right' }}>+{m.edge}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </main>
   );
