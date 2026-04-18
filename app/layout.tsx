@@ -1,4 +1,9 @@
-import './globals.css' // OVA LINIJA JE KLJUČNA
+import './globals.css'
+
+export const metadata = {
+  title: 'SmartScanner PRO',
+  description: 'Real-time Arbitrage & Value Detection',
+}
 
 export default function RootLayout({
   children,
@@ -7,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="bg-[#020617]">{children}</body>
     </html>
   )
 }
