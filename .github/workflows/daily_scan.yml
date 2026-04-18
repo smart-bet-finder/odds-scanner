@@ -1,8 +1,8 @@
 name: 90min Odds Scan
 on:
   schedule:
-    - cron: '0 */2 * * *' 
-  workflow_dispatch: 
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -10,17 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.MY_TOKEN }} # OVO KAŽE: "KORISTI MAJIN KLJUČ"
+          token: ${{ secrets.MY_TOKEN }}
 
       - name: Fetch API Data
         run: |
-          mkdir -p public
           curl "https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey=8d79681b1e42354408fb13d12b34887d&regions=eu&markets=h2h" -o public/data.json
+          # Kopiramo ga i u root radi sigurnosti GitHub Pages-a
+          cp public/data.json data.json
           
       - name: Commit and Push Data
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git add public/data.json
+          git add public/data.json data.json
           git commit -m "Automated Odds Update" || exit 0
           git push
