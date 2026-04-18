@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  // Ovo govori Next-u da se sajt nalazi na /odds-scanner/ putanji
   basePath: '/odds-scanner',
   assetPrefix: '/odds-scanner',
   images: {
@@ -9,4 +8,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
