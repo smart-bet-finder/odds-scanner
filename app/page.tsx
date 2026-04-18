@@ -10,14 +10,12 @@ export default function Page() {
       try {
         const timestamp = new Date().getTime();
         const response = await fetch(`./data.json?t=${timestamp}`);
-        
-        if (!response.ok) throw new Error("File not found");
+        if (!response.ok) throw new Error("No data");
         const result = await response.json();
         
         const processed = result.map((match: any) => {
           const bookies = match.bookmakers || [];
           if (bookies.length === 0) return null;
-
           const homeOdds = bookies.map((b: any) => b.markets[0]?.outcomes[0]?.price).filter(Boolean);
           const avg = homeOdds.reduce((a: number, b: number) => a + b, 0) / homeOdds.length;
           const best = bookies.reduce((prev: any, curr: any) => {
@@ -37,92 +35,86 @@ export default function Page() {
 
         setData(processed);
       } catch (err) {
-        console.error("Syncing...");
+        console.error("Sync...");
       } finally {
         setLoading(false);
       }
     };
-
     loadData();
   }, []);
 
-  // Pomocna funkcija za racunanje tiketa
-  const getSteadyBuild = () => {
-    return data
-      .filter((m: any) => parseFloat(m.best) >= 1.30 && parseFloat(m.best) <= 1.85)
-      .sort((a: any, b: any) => parseFloat(b.edge) - parseFloat(a.edge))
-      .slice(0, 4);
-  };
+  const steadyBuild = data
+    .filter((m: any) => parseFloat(m.best) >= 1.30 && parseFloat(m.best) <= 1.85)
+    .sort((a: any, b: any) => parseFloat(b.edge) - parseFloat(a.edge))
+    .slice(0, 4);
 
-  const getRocketCombo = () => {
-    return data
-      .sort((a: any, b: any) => parseFloat(b.edge) - parseFloat(a.edge))
-      .slice(0, 3);
-  };
+  const rocketCombo = data
+    .sort((a: any, b: any) => parseFloat(b.edge) - parseFloat(a.edge))
+    .slice(0, 3);
 
-  const steadyBuild = getSteadyBuild();
-  const rocketCombo = getRocketCombo();
+  const sOdds = steadyBuild.reduce((acc: number, curr: any) => acc * curr.best, 1).toFixed(2);
+  const rOdds = rocketCombo.reduce((acc: number, curr: any) => acc * curr.best, 1).toFixed(2);
 
-  const steadyTotalOdds = steadyBuild.reduce((acc: number, curr: any) => acc * curr.best, 1).toFixed(2);
-  const rocketTotalOdds = rocketCombo.reduce((acc: number, curr: any) => acc * curr.best, 1).toFixed(2);
-
+  // KORISTIMO OBIČAN DIV UMESTO MAIN I ČISTU SINTAKSU
   return (
-    <main style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#f1f5f9' }}>
-      <header style={{ marginBottom: '40px', borderBottom: '1px solid #1e293b', paddingBottom: '20px' }}>
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#f1f5f9', fontFamily: 'sans-serif' }}>
+      <div style={{ marginBottom: '40px', borderBottom: '1px solid #1e293b', paddingBottom: '20px' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>
           Smart<span style={{ color: '#22c55e' }}>Scanner</span> PRO
         </h1>
         <p style={{ color: '#64748b', fontSize: '12px' }}>🛡️ Shield Mode: Safe API Usage</p>
-      </header>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-        
-        {/* STEADY BUILD */}
-        <div style={{ background: 'linear-gradient(145deg, #0f172a, #1e293b)', padding: '25px', borderRadius: '24px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <h3 style={{ margin: 0, color: '#22c55e', textTransform: 'uppercase', fontSize: '14px' }}>🛡️ Steady Build</h3>
-            <span style={{ fontSize: '10px', background: '#22c55e', color: '#000', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>SAFE ACCUMULATOR</span>
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            {steadyBuild.length > 0 ? steadyBuild.map((m: any) => (
-              <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{m.teams}</span>
-                <span style={{ fontWeight: 'bold' }}>{m.best}</span>
-              </div>
-            )) : <p style={{color: '#64748b', fontSize: '12px'}}>Tražim parove...</p>}
-          </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#64748b', fontSize: '12px' }}>Total Odds:</span>
-            <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff' }}>{steadyTotalOdds === "1.00" ? "---" : steadyTotalOdds}</span>
+        <div style={{ background: '#1e293b', padding: '25px', borderRadius: '24px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+          <h3 style={{ margin: '0 0 15px 0', color: '#22c55e', fontSize: '14px' }}>🛡️ STEADY BUILD</h3>
+          {steadyBuild.map((m: any) => (
+            <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+              <span>{m.teams}</span><b>{m.best}</b>
+            </div>
+          ))}
+          <div style={{ borderTop: '1px solid #334155', marginTop: '10px', paddingTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
+            <span>Total Odds:</span><strong>{sOdds === "1.00" ? "---" : sOdds}</strong>
           </div>
         </div>
 
-        {/* ROCKET COMBO */}
-        <div style={{ background: 'linear-gradient(145deg, #0f172a, #1e293b)', padding: '25px', borderRadius: '24px', border: '1px solid rgba(96, 165, 250, 0.2)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <h3 style={{ margin: 0, color: '#60a5fa', textTransform: 'uppercase', fontSize: '14px' }}>🚀 Rocket Combo</h3>
-            <span style={{ fontSize: '10px', background: '#60a5fa', color: '#000', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>HIGH VALUE</span>
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            {rocketCombo.length > 0 ? rocketCombo.map((m: any) => (
-              <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{m.teams}</span>
-                <span style={{ fontWeight: 'bold' }}>{m.best}</span>
-              </div>
-            )) : <p style={{color: '#64748b', fontSize: '12px'}}>Skeniram...</p>}
-          </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#64748b', fontSize: '12px' }}>Total Odds:</span>
-            <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff' }}>{rocketTotalOdds === "1.00" ? "---" : rocketTotalOdds}</span>
+        <div style={{ background: '#1e293b', padding: '25px', borderRadius: '24px', border: '1px solid rgba(96, 165, 250, 0.2)' }}>
+          <h3 style={{ margin: '0 0 15px 0', color: '#60a5fa', fontSize: '14px' }}>🚀 ROCKET COMBO</h3>
+          {rocketCombo.map((m: any) => (
+            <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+              <span>{m.teams}</span><b>{m.best}</b>
+            </div>
+          ))}
+          <div style={{ borderTop: '1px solid #334155', marginTop: '10px', paddingTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
+            <span>Total Odds:</span><strong>{rOdds === "1.00" ? "---" : rOdds}</strong>
           </div>
         </div>
       </div>
 
-      <div className="table-container" style={{ background: '#0f172a', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ background: '#0f172a', borderRadius: '20px', overflowX: 'auto', border: '1px solid #1e293b' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <tr>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>MATCH</th>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>AVG</th>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#22c55e', fontSize: '11px' }}>BEST</th>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>
+          <thead>
+            <tr style={{ color: '#64748b', fontSize: '11px', textAlign: 'left' }}>
+              <th style={{ padding: '15px' }}>MATCH</th>
+              <th style={{ padding: '15px' }}>AVG</th>
+              <th style={{ padding: '15px', color: '#22c55e' }}>BEST</th>
+              <th style={{ padding: '15px', textAlign: 'right' }}>EDGE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.length > 0 ? data.map((m: any) => (
+              <tr key={m.id} style={{ borderTop: '1px solid #1e293b' }}>
+                <td style={{ padding: '15px', fontSize: '14px' }}>{m.teams}</td>
+                <td style={{ padding: '15px', color: '#64748b' }}>{m.avg}</td>
+                <td style={{ padding: '15px', fontWeight: 'bold' }}>{m.best}</td>
+                <td style={{ padding: '15px', textAlign: 'right', color: '#22c55e' }}>+{m.edge}%</td>
+              </tr>
+            )) : (
+              <tr><td colSpan={4} style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Syncing data...</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
