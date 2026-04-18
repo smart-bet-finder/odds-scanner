@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'export',  // OVA LINIJA JE KLJUČNA
+    output: 'export',
     images: {
-        unoptimized: true, // Obavezno za statički export
+        unoptimized: true,
     },
 };
 
