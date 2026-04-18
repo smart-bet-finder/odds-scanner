@@ -4,15 +4,16 @@ import React, { useState, useEffect } from 'react';
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [country, setCountry] = useState('RS'); // Default Srbija
+  const [country, setCountry] = useState('RS'); 
   const [systemPicks, setSystemPicks] = useState<{ steady: any, rocket: any }>({ steady: null, rocket: null });
 
-  // Mapiranje zemalja na API regione
+  // Mapiranje država na API regije (Tehničko ograničenje API-ja)
   const countryToRegion: { [key: string]: string } = {
-    'RS': 'eu', 'HR': 'eu', 'DE': 'eu', 'IT': 'eu', 'FR': 'eu', 'ES': 'eu',
-    'GB': 'uk', 'IE': 'uk',
-    'US': 'us', 'CA': 'us',
-    'AU': 'au'
+    'RS': 'eu', 'HR': 'eu', 'ME': 'eu', 'BA': 'eu', // Balkan -> EU regija (bwin, Unibet...)
+    'DE': 'eu', 'IT': 'eu', 'FR': 'eu', 'ES': 'eu', // Evropa -> EU regija
+    'GB': 'uk', 'IE': 'uk',                         // UK/Irsko -> UK regija
+    'US': 'us', 'CA': 'us',                         // S. Amerika -> US regija
+    'AU': 'au'                                      // Australija -> AU regija
   };
 
   const loadData = async (selectedCountry: string) => {
@@ -54,7 +55,7 @@ export default function Page() {
       Object.keys(bookiePortfolios).forEach(bookieName => {
         const matches = bookiePortfolios[bookieName];
         const steadyMatches = matches
-          .filter((m: any) => m.price >= 1.30 && m.price <= 1.95)
+          .filter((m: any) => m.price >= 1.30 && m.price <= 2.00)
           .sort((a: any, b: any) => (b.price / b.avg) - (a.price / a.avg))
           .slice(0, 3);
         
@@ -103,36 +104,25 @@ export default function Page() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#f1f5f9', fontFamily: 'sans-serif', backgroundColor: '#020617', minHeight: '100vh' }}>
-      <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #1e293b', paddingBottom: '15px' }}>
-        <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>
-            Smart<span style={{ color: '#22c55e' }}>Scanner</span> PRO
-          </h1>
-          <p style={{ color: '#64748b', fontSize: '11px' }}>Automated Daily Analysis Mode</p>
-        </div>
+      <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '15px' }}>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>
+          Smart<span style={{ color: '#22c55e' }}>Scanner</span> PRO
+        </h1>
         
-        <div style={{ textAlign: 'right' }}>
-          <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '5px' }}>SELECT YOUR COUNTRY:</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '11px', color: '#64748b' }}>YOUR COUNTRY:</span>
           <select 
             value={country} 
             onChange={(e) => setCountry(e.target.value)}
-            style={{ backgroundColor: '#0f172a', color: '#fff', border: '1px solid #334155', padding: '8px 15px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}
+            style={{ backgroundColor: '#0f172a', color: '#fff', border: '1px solid #334155', padding: '8px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}
           >
-            <optgroup label="Balkan">
-              <option value="RS">Serbia 🇷🇸</option>
-              <option value="HR">Croatia 🇭🇷</option>
-            </optgroup>
-            <optgroup label="Europe">
-              <option value="DE">Germany 🇩🇪</option>
-              <option value="IT">Italy 🇮🇹</option>
-              <option value="FR">France 🇫🇷</option>
-              <option value="ES">Spain 🇪🇸</option>
-            </optgroup>
-            <optgroup label="Others">
-              <option value="GB">United Kingdom 🇬🇧</option>
-              <option value="US">USA 🇺🇸</option>
-              <option value="AU">Australia 🇦🇺</option>
-            </optgroup>
+            <option value="RS">Serbia 🇷🇸</option>
+            <option value="HR">Croatia 🇭🇷</option>
+            <option value="BA">Bosnia 🇧🇦</option>
+            <option value="ME">Montenegro 🇲🇪</option>
+            <option value="DE">Germany 🇩🇪</option>
+            <option value="GB">United Kingdom 🇬🇧</option>
+            <option value="US">USA 🇺🇸</option>
           </select>
         </div>
       </header>
@@ -141,9 +131,9 @@ export default function Page() {
         
         {/* STEADY BUILD */}
         <div style={{ background: '#0f172a', padding: '20px', borderRadius: '24px', border: '1px solid rgba(34, 197, 94, 0.2)', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '20px', background: '#22c55e', color: '#000', fontSize: '9px', fontWeight: 'bold', padding: '3px 10px', borderRadius: '12px' }}>MULTI-BET TICKET</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '20px', background: '#22c55e', color: '#000', fontSize: '9px', fontWeight: 'bold', padding: '3px 10px', borderRadius: '12px' }}>ACCUMULATOR</div>
           <h3 style={{ margin: '0 0 15px 0', color: '#22c55e', fontSize: '12px', letterSpacing: '1px' }}>🛡️ STEADY BUILD</h3>
-          <p style={{ fontSize: '10px', color: '#64748b', marginBottom: '15px' }}>Best odds at: <b style={{ color: '#f1f5f9' }}>{systemPicks.steady?.bookie || '---'}</b></p>
+          <p style={{ fontSize: '10px', color: '#64748b', marginBottom: '15px' }}>Bookmaker: <b style={{ color: '#f1f5f9' }}>{systemPicks.steady?.bookie || 'Scanning...'}</b></p>
           {systemPicks.steady?.matches.map((m: any, i: number) => (
             <div key={i} style={{ fontSize: '13px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between' }}>
               <span>{m.teams}</span>
@@ -151,16 +141,16 @@ export default function Page() {
             </div>
           ))}
           <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: '#64748b' }}>TOTAL ACCUMULATOR:</span>
+            <span style={{ fontSize: '11px', color: '#64748b' }}>TOTAL ODDS:</span>
             <strong style={{ fontSize: '1.6rem', color: '#fff' }}>{systemPicks.steady?.odds || '---'}</strong>
           </div>
         </div>
 
         {/* ROCKET COMBO */}
         <div style={{ background: '#0f172a', padding: '20px', borderRadius: '24px', border: '1px solid rgba(59, 130, 246, 0.2)', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '20px', background: '#3b82f6', color: '#fff', fontSize: '9px', fontWeight: 'bold', padding: '3px 10px', borderRadius: '12px' }}>SYSTEM READY (3/3)</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '20px', background: '#3b82f6', color: '#fff', fontSize: '9px', fontWeight: 'bold', padding: '3px 10px', borderRadius: '12px' }}>SYSTEM (3/3)</div>
           <h3 style={{ margin: '0 0 15px 0', color: '#3b82f6', fontSize: '12px', letterSpacing: '1px' }}>🚀 ROCKET COMBO</h3>
-          <p style={{ fontSize: '10px', color: '#64748b', marginBottom: '15px' }}>Best odds at: <b style={{ color: '#f1f5f9' }}>{systemPicks.rocket?.bookie || '---'}</b></p>
+          <p style={{ fontSize: '10px', color: '#64748b', marginBottom: '15px' }}>Bookmaker: <b style={{ color: '#f1f5f9' }}>{systemPicks.rocket?.bookie || 'Scanning...'}</b></p>
           {systemPicks.rocket?.matches.map((m: any, i: number) => (
             <div key={i} style={{ fontSize: '13px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between' }}>
               <span>{m.teams}</span>
@@ -168,16 +158,13 @@ export default function Page() {
             </div>
           ))}
           <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: '#64748b' }}>TOTAL SYSTEM ODDS:</span>
+            <span style={{ fontSize: '11px', color: '#64748b' }}>TOTAL ODDS:</span>
             <strong style={{ fontSize: '1.6rem', color: '#fff' }}>{systemPicks.rocket?.odds || '---'}</strong>
           </div>
         </div>
       </div>
 
       <div style={{ background: '#0f172a', borderRadius: '20px', overflow: 'hidden', border: '1px solid #1e293b' }}>
-        <div style={{ padding: '15px', borderBottom: '1px solid #1e293b', background: 'rgba(255,255,255,0.02)' }}>
-          <h4 style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>LIVE MARKET FEED (ALL BOOKMAKERS)</h4>
-        </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr style={{ color: '#64748b', textAlign: 'left', fontSize: '11px' }}>
@@ -190,14 +177,14 @@ export default function Page() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>Refreshing market data for {country}...</td></tr>
+              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>Loading local market data...</td></tr>
             ) : data.map((m: any) => (
               <tr key={m.id} style={{ borderBottom: '1px solid #1e293b' }}>
-                <td style={{ padding: '15px', fontWeight: '500' }}>{m.teams}</td>
+                <td style={{ padding: '15px' }}>{m.teams}</td>
                 <td style={{ padding: '15px', color: '#64748b' }}>{m.avg}</td>
-                <td style={{ padding: '15px', fontWeight: '900', color: '#22c55e', fontSize: '14px' }}>{m.best}</td>
-                <td style={{ padding: '15px' }}><span style={{ backgroundColor: '#1e293b', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', color: '#94a3b8' }}>{m.bookie}</span></td>
-                <td style={{ padding: '15px', textAlign: 'right', color: '#22c55e', fontWeight: '900' }}>+{m.edge}%</td>
+                <td style={{ padding: '15px', fontWeight: 'bold', color: '#22c55e' }}>{m.best}</td>
+                <td style={{ padding: '15px' }}><span style={{ backgroundColor: '#1e293b', padding: '4px 10px', borderRadius: '6px', fontSize: '11px' }}>{m.bookie}</span></td>
+                <td style={{ padding: '15px', textAlign: 'right', color: '#22c55e', fontWeight: 'bold' }}>+{m.edge}%</td>
               </tr>
             ))}
           </tbody>
