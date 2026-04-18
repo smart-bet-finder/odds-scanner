@@ -7,7 +7,6 @@ export default function Page() {
 
   const loadData = async () => {
     try {
-      // Dodajemo timestamp da nateramo GitHub da osveži fajl odmah
       const timestamp = new Date().getTime();
       const response = await fetch(`./data.json?t=${timestamp}`);
       
@@ -37,16 +36,18 @@ export default function Page() {
 
       setData(processed);
     } catch (err) {
-      console.error("Podaci se sinhronizuju...");
+      console.error("Syncing...");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const steadyBuild = data
-    .filter(m => m.best >= 1.30 && m.best <= 1.85)
+    .filter(m => parseFloat(m.best) >= 1.30 && parseFloat(m.best) <= 1.85)
     .sort((a, b) => parseFloat(b.edge) - parseFloat(a.edge))
     .slice(0, 4);
 
@@ -58,6 +59,7 @@ export default function Page() {
 
   const rocketTotalOdds = rocketCombo.reduce((acc, curr) => acc * curr.best, 1).toFixed(2);
 
+  // RETURN BLOK SA OBAVEZNIM ZAGRADAMA
   return (
     <main style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#f1f5f9' }}>
       <header style={{ marginBottom: '40px', borderBottom: '1px solid #1e293b', paddingBottom: '20px' }}>
@@ -75,52 +77,13 @@ export default function Page() {
             <span style={{ fontSize: '10px', background: '#22c55e', color: '#000', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>SAFE ACCUMULATOR</span>
           </div>
           <div style={{ marginBottom: '15px' }}>
-            {steadyBuild.length > 0 ? steadyBuild.map(m => (
+            {steadyBuild.length > 0 ? steadyBuild.map((m: any) => (
               <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
                 <span>{m.teams}</span>
                 <span style={{ fontWeight: 'bold' }}>{m.best}</span>
               </div>
-            )) : <p style={{color: '#64748b', fontSize: '12px'}}>Tražim najbolje parove...</p>}
+            )) : <p style={{color: '#64748b', fontSize: '12px'}}>Tražim parove...</p>}
           </div>
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: '#64748b', fontSize: '12px' }}>Total Odds:</span>
-            <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff' }}>{steadyTotalOdds === "1.00" ? "---" : steadyTotalOdds}</span>
-          </div>
-        </div>
-
-        <div style={{ background: 'linear-gradient(145deg, #0f172a, #1e293b)', padding: '25px', borderRadius: '24px', border: '1px solid rgba(96, 165, 250, 0.2)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <h3 style={{ margin: 0, color: '#60a5fa', textTransform: 'uppercase', fontSize: '14px' }}>🚀 Rocket Combo</h3>
-            <span style={{ fontSize: '10px', background: '#60a5fa', color: '#000', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>HIGH VALUE</span>
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            {rocketCombo.length > 0 ? rocketCombo.map(m => (
-              <div key={m.id} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{m.teams}</span>
-                <span style={{ fontWeight: 'bold' }}>{m.best}</span>
-              </div>
-            )) : <p style={{color: '#64748b', fontSize: '12px'}}>Skeniram tržište...</p>}
-          </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#64748b', fontSize: '12px' }}>Total Odds:</span>
-            <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff' }}>{rocketTotalOdds === "1.00" ? "---" : rocketTotalOdds}</span>
-          </div>
-        </div>
-
-      </div>
-
-      <div className="table-container" style={{ background: '#0f172a', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <tr>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>MATCH</th>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>AVG</th>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#22c55e', fontSize: '11px' }}>BEST</th>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '11px' }}>BOOKIE</th>
-              <th style={{ padding: '15px', textAlign: 'right', color: '#64748b', fontSize: '11px' }}>EDGE</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? data.map((m) => (
-              <tr key={m.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                <td style={{
+            <span style={{ fontSize: '1.5rem', fontWeight: '900', color
