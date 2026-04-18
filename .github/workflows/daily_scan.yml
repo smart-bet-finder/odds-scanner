@@ -1,8 +1,12 @@
 name: 90min Odds Scan
 on:
   schedule:
-    - cron: '0 */1 * * *' # Ovo će raditi na svakih sat i po (približno)
-  workflow_dispatch: # Dozvoljava ti da pokreneš sken ručno kad god želiš
+    - cron: '0 */2 * * *' 
+  workflow_dispatch: 
+
+# DODAJ OVE LINIJE ISPOD:
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -20,5 +24,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add public/data.json
-          git commit -m "Automated Odds Update (90min cycle)" || exit 0
+          git commit -m "Automated Odds Update" || exit 0
           git push
