@@ -1,9 +1,4 @@
-import './globals.css'
-
-export const metadata = {
-  title: 'Smart Scanner PRO',
-  description: 'Real-time Arbitrage & Value Detection',
-}
+import './globals.css' // OVA LINIJA JE KLJUČNA
 
 export default function RootLayout({
   children,
